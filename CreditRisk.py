@@ -12,11 +12,16 @@ from sklearn.metrics import recall_score
 import pydotplus
 from sklearn.metrics import roc_curve, auc
 
+####################################################################################
+
+# Reading the CSV File
+
 df=pd.read_csv('C:/Users/IBM_ADMIN/Downloads/Credit Risk/Credit Risk.csv')
 df.drop('score', axis=1, inplace=True)
 
 #####################################################################################
-# Hot Encoding
+
+# Hot Encoding - Numarical Labelizing of the categories
 
 lb = LabelEncoder()
 df['applied_online'] = lb.fit_transform(df['applied_online'])
@@ -32,19 +37,28 @@ train, test = train_test_split(df, test_size = 0.2, random_state=33)
 
 #####################################################################################
 
-# Predictive Classification Modeling using Decision Tree - CART
+# Predictive Classification Modeling using Decision Tree - CART (Gini)
+
+# Selecting the independent and dependent variables
 
 X_Train=train[train.columns[:-1]]
 Y_Train=train[train.columns[-1]]
 X_Test=test[test.columns[:-1]]
 Y_Test=test[test.columns[-1]]
 
+# Fitting the predictive model on Training data
+
 clf_dt = tree.DecisionTreeClassifier(criterion='gini', max_depth=3, min_samples_leaf=5)
 clf_dt.fit(X_Train, Y_Train)
+
+# Prediction on the Test data
+
 Y_Pred = clf_dt.predict(X_Test)
 
-
 #####################################################################################
+
+# Tried other algorithms, but bad performance
+
 #from sklearn.neural_network import MLPClassifier
 #mlp = MLPClassifier(hidden_layer_sizes=(13,13,13),max_iter=500)
 #mlp.fit(X_Train, Y_Train)
@@ -55,27 +69,15 @@ Y_Pred = clf_dt.predict(X_Test)
 #clfsvm.fit(X_Train, Y_Train)
 #Y_PredSVM = clfsvm.predict(X_Test)
 
-#from sklearn.ensemble import RandomForestClassifier
-#clfRF = RandomForestClassifier(n_estimators=10, max_depth=None, min_samples_split=2, random_state=0)
-#clfRF.fit(X_Train, Y_Train)
-#Y_PredRF=clfRF.predict(X_Test)
-
 #####################################################################################
 
 # Accuracy Scores
-#Decision Tree
 
 print("Accuracy on training set:")
 print (clf_dt.score(X_Train, Y_Train))
 
 print("Accuracy on test set:")
 print (clf_dt.score(X_Test, Y_Test))
-
-#print("Accuracy on training set:")
-#print (clfRF.score(X_Train, Y_Train))
-
-#print("Accuracy on test set:")
-#print (clfRF.score(X_Test, Y_Test))
 
 #####################################################################################
 
@@ -116,7 +118,6 @@ def plot_confusion_matrix(cm, classes,normalize=False,title='Confusion matrix',c
 cnf_matrix = confusion_matrix(Y_Test, Y_Pred)
 np.set_printoptions(precision=2)
 
-
 # Plot non-normalized confusion matrix
 plt.figure()
 plot_confusion_matrix(cnf_matrix, classes=class_names, title='Confusion matrix, without normalization')
@@ -145,24 +146,13 @@ precision_score(Y_Test, Y_Pred, average='binary')
 recall_score(Y_Test, Y_Pred, average='binary')
 clf_dt.feature_importances_
 
-clfRF.feature_importances_
-
-# applied_online 0, age 0, account_age 0.02, account_type 0, city_code 0.05, loyalty_class 0, ict_ve_cntr 0.01,
-#  car_loan_holder 0.76, higher_education 0, years_mil_service 0.1, home_loan_holder 0, eligibility_class 0, account_fees_prev_year 0.06
-
-# 0.  ,  0.  ,  0.02,  0.  ,  0.05,  0.  ,  0.01,  0.76,  0.  ,  0.1 ,  0.  ,  0.  ,  0.06
-
 #######################################################################################
 
 # ROC AUC
 
 fpr, tpr, _ = roc_curve(Y_Test, clf_dt.predict_proba(X_Test)[:,1])
-#fpr, tpr, _ = roc_curve(Y_Test, Y_Pred)
 
 roc_auc = auc(fpr, tpr)
-
-#fpr, tpr, _ = roc_curve(Y_Test, clfRF.predict_proba(X_Test)[:,1])
-#roc_auc_score(Y_Test, Y_Pred)
 
 print('ROC AUC: %0.2f' % roc_auc)
 
